@@ -2,7 +2,7 @@
    Stock Finder – main JavaScript logic (fixed)
    -------------------------------------------------------------- */
 
-const API_KEY = 'YOUR_REAL_API_KEY_HERE';   // <-- replace with a real key
+const API_KEY = 'd2daae79b6014e0790687cbaf15de001';   // <-- replace with a real key
 const ENDPOINT = 'https://api.twelvedata.com/search';
 
 /* --------------------------------------------------------------
