@@ -93,19 +93,6 @@ function renderResults(stocks, query) {
   stocks.forEach(stock => {
     const li = document.createElement('li');
 
-    // Show: Symbol – Company Name (Exchange)
-    const txt = `${stock.symbol} – ${stock.name} (${stock.exchange})`;
-    const span = document.createElement('span');
-    span.textContent = txt;
-    li.appendChild(span);
-
-    stockList.appendChild(li);
-  });
-}
-
-  stocks.forEach(stock => {
-    const li = document.createElement('li');
-
     // Create a link that could navigate to a detailed view (optional)
     const link = document.createElement('a');
     link.href = '#';                     // placeholder – you can replace with /stock.html?symbol=...
