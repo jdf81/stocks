@@ -27,51 +27,29 @@ function toggleResults(show) {
      - type (stock, etf, etc.)
    We filter to keep only "stock" entries and then render them.
    -------------------------------------------------------------- */
-/* --------------------------------------------------------------
-   Search for stocks that match a keyword.
-   Returns an array of objects: {symbol, name, exchange, type}
-   -------------------------------------------------------------- */
 async function searchStocks(keyword) {
   try {
-    // 👉 NOTE: we use `symbol=` (not `q=`) and add `type=stock`
-    const url = `${ENDPOINT}?symbol=${encodeURIComponent(keyword)}&apikey=${API_KEY}&type=stock`;
-
+    const url = `${ENDPOINT}?symbol=${encodeURIComponent(keyword)}&apikey=${API_KEY}&prettyjson`;
     const resp = await fetch(url);
-    if (!resp.ok) {
-      // network error or HTTP error – show nothing
-      console.error('Network / HTTP error:', resp.status, resp.statusText);
-      return [];
-    }
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
     const data = await resp.json();
 
-    /* --------------------------------------------------------------
-       TwelfthData may return:
-          { status: "success", symbols: [ … ] }   <-- typical modern response
-          or just an array of items (older version)
-       We handle both.
-       -------------------------------------------------------------- */
-    let symbols;
-    if (data.status === 'success' && Array.isArray(data.symbols)) {
-      symbols = data.symbols;               // modern format
-    } else if (Array.isArray(data)) {
-      symbols = data;                         // legacy format
-    } else {
-      // Unexpected payload – treat as empty list
-      console.warn('Unexpected API payload', data);
-      return [];
+    // TwelfthData returns { status: "success", symbols: [...] }
+    if (data.status !== 'success' || !Array.isArray(data.symbols)) {
+      throw new Error('Invalid API response');
     }
 
     // Keep only real stocks (ignore ETFs, futures, etc.)
-    const stocks = symbols.filter(item => item.type === 'stock');
+    const stocks = data.symbols.filter(item => item.type === 'stock');
 
     return stocks;
   } catch (err) {
-    console.error('searchStocks error:', err);
-    return [];   // empty list → UI can show “no matches”
+    console.error('Search error:', err);
+    // Return an empty array so UI can show a friendly message
+    return [];
   }
 }
-
 
 /* --------------------------------------------------------------
    2️⃣ Render the list of matches.
