@@ -2,8 +2,8 @@
    Stock Finder – main JavaScript logic
    -------------------------------------------------------------- */
 
-const API_KEY = 'DEMO_API_KEY'; // <-- replace with a real key (see note below)
-const ENDPOINT = 'd2daae79b6014e0790687cbaf15de001';
+const API_KEY = 'd2daae79b6014e0790687cbaf15de001'; // <-- replace with a real key (see note below)
+const ENDPOINT = 'https://api.twelvedata.com/search';
 
 const keywordInput = document.getElementById('keyword');
 const searchBtn    = document.getElementById('searchBtn');
@@ -126,3 +126,4 @@ keywordInput.addEventListener('keypress', e => {
      - request parameters
      - parsing logic inside `searchStocks`
    -------------------------------------------------------------- */
+
