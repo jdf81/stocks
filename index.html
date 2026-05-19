@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Essential iOS meta tags -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Finder – PWA</title>
+
+  <!-- Manifest (adds to Home Screen on iOS/Android) -->
+  <link rel="manifest" href="manifest.json">
+  
+  
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <!-- iOS Safari needs this for the “Add to Home Screen” banner -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Stock Finder">
+
+  <!-- Link to stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Optional: preload the manifest for iOS (helps with caching) -->
+  <link rel="preload" href="manifest.json" as="manifest">
+</head>
+
+<body>
+  <header class="app-header">
+    <h1>Stock Finder</h1>
+  </header>
+
+  <main class="app-main">
+    <!-- Search bar -->
+    <section class="search-section">
+      <label for="keyword">Search stocks by keyword (ticker, company name…)</label>
+      <input type="text" id="keyword" placeholder="e.g. AAPL, Apple, technology" autocomplete="off" />
+      <button id="searchBtn" aria-label="Search">🔍 Search</button>
+    </section>
+
+    <!-- Results container -->
+    <section id="results" class="results-section hidden">
+      <h2>Matches for “<span id="queryDisplay"></span>”</h2>
+      <ul id="stockList"></ul>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <small>Powered by Twelvedata (demo API). Works offline after first load.</small>
+  </footer>
+
+  <!-- Register Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('SW registered (scope =', reg.scope, ')'))
+          .catch(err => console.error('SW registration failed:', err));
+      });
+    }
+  </script>
+
+  <!-- App logic -->
+  <script src="app.js"></script>
+</body>
+</html>
