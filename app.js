@@ -29,25 +29,32 @@ function toggleResults(show) {
    -------------------------------------------------------------- */
 async function searchStocks(keyword) {
   try {
-    const url = `${ENDPOINT}?symbol=${encodeURIComponent(keyword)}&apikey=${API_KEY}&prettyjson`;
+    // <-- NOTE: use `q=` for a free‑text keyword search
+    const url = `${ENDPOINT}?q=${encodeURIComponent(keyword)}&apikey=${API_KEY}&prettyjson`;
+
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
     const data = await resp.json();
 
-    // TwelfthData returns { status: "success", symbols: [...] }
-    if (data.status !== 'success' || !Array.isArray(data.symbols)) {
+    // TwelfthData may return {status:"success", symbols: [...]}
+    // or just an array of items. Handle both.
+    let symbols;
+    if (data.status === 'success' && Array.isArray(data.symbols)) {
+      symbols = data.symbols;
+    } else if (Array.isArray(data)) {
+      symbols = data;                     // older API version
+    } else {
       throw new Error('Invalid API response');
     }
 
     // Keep only real stocks (ignore ETFs, futures, etc.)
-    const stocks = data.symbols.filter(item => item.type === 'stock');
+    const stocks = symbols.filter(item => item.type === 'stock');
 
     return stocks;
   } catch (err) {
     console.error('Search error:', err);
-    // Return an empty array so UI can show a friendly message
-    return [];
+    return [];   // empty list → UI can show “no matches”
   }
 }
 
@@ -67,6 +74,19 @@ function renderResults(stocks, query) {
     stockList.appendChild(emptyItem);
     return;
   }
+
+  stocks.forEach(stock => {
+    const li = document.createElement('li');
+
+    // Show: Symbol – Company Name (Exchange)
+    const txt = `${stock.symbol} – ${stock.name} (${stock.exchange})`;
+    const span = document.createElement('span');
+    span.textContent = txt;
+    li.appendChild(span);
+
+    stockList.appendChild(li);
+  });
+}
 
   stocks.forEach(stock => {
     const li = document.createElement('li');
