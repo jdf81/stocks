@@ -27,25 +27,39 @@ function toggleResults(show) {
      - type (stock, etf, etc.)
    We filter to keep only "stock" entries and then render them.
    -------------------------------------------------------------- */
+/* --------------------------------------------------------------
+   Search for stocks that match a keyword.
+   Returns an array of objects: {symbol, name, exchange, type}
+   -------------------------------------------------------------- */
 async function searchStocks(keyword) {
   try {
-    // <-- NOTE: use `q=` for a free‑text keyword search
-    const url = `${ENDPOINT}?q=${encodeURIComponent(keyword)}&apikey=${API_KEY}&prettyjson`;
+    // 👉 NOTE: we use `symbol=` (not `q=`) and add `type=stock`
+    const url = `${ENDPOINT}?symbol=${encodeURIComponent(keyword)}&apikey=${API_KEY}&type=stock`;
 
     const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    if (!resp.ok) {
+      // network error or HTTP error – show nothing
+      console.error('Network / HTTP error:', resp.status, resp.statusText);
+      return [];
+    }
 
     const data = await resp.json();
 
-    // TwelfthData may return {status:"success", symbols: [...]}
-    // or just an array of items. Handle both.
+    /* --------------------------------------------------------------
+       TwelfthData may return:
+          { status: "success", symbols: [ … ] }   <-- typical modern response
+          or just an array of items (older version)
+       We handle both.
+       -------------------------------------------------------------- */
     let symbols;
     if (data.status === 'success' && Array.isArray(data.symbols)) {
-      symbols = data.symbols;
+      symbols = data.symbols;               // modern format
     } else if (Array.isArray(data)) {
-      symbols = data;                     // older API version
+      symbols = data;                         // legacy format
     } else {
-      throw new Error('Invalid API response');
+      // Unexpected payload – treat as empty list
+      console.warn('Unexpected API payload', data);
+      return [];
     }
 
     // Keep only real stocks (ignore ETFs, futures, etc.)
@@ -53,10 +67,11 @@ async function searchStocks(keyword) {
 
     return stocks;
   } catch (err) {
-    console.error('Search error:', err);
+    console.error('searchStocks error:', err);
     return [];   // empty list → UI can show “no matches”
   }
 }
+
 
 /* --------------------------------------------------------------
    2️⃣ Render the list of matches.
